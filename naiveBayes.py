@@ -60,9 +60,150 @@ class NaiveBayesClassifier(classificationMethod.ClassificationMethod):
     self.legalLabels.
     """
 
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
-        
+    # print("Testing train tune")
+    # print(self.legalLabels)
+    # print(type(trainingLabels[0]), type(self.legalLabels[0]))
+    # print("Training labels", trainingLabels)
+    # print(len(self.features))
+    # print('Training Data', trainingData[0])
+
+    # for i in range(100):
+    #   highestValue = trainingData[i].sortedKeys()[0]
+    #   print(trainingData[i][highestValue])
+
+    # for items in trainingData[0].items():
+    #   print(items)
+    # for label in trainingLabels:
+    #   print(label)
+
+
+    ######################
+    # Prior Distribution #
+    ######################
+    prior = util.Counter()
+
+    for label in trainingLabels:
+      prior[label] += 1
+
+    prior.normalize()
+
+    self.prior = prior
+
+    # self.calculateLogJointProbabilities(trainingData[0])
+
+    # print(prior)
+
+    ####################################################
+    # Keep track of feature values per pixel per label #
+    ####################################################
+    count_dict = {}
+    feature_val_dict = {}
+    FEATURE_VALS = [0,1,2]
+
+    feature_val_counter = util.Counter()
+    for feature in self.features:
+      feature_val_counter[feature]
+
+    for label in self.legalLabels:
+      feature_val_dict = {}
+      for val in FEATURE_VALS:
+        feature_val_dict[val] = feature_val_counter.copy()
+
+      count_dict[label] = feature_val_dict
+
+    for i in range(len(trainingLabels)):
+      label = trainingLabels[i]
+      for items in trainingData[i].items():
+        count_dict[label][items[1]][items[0]] += 1
+
+    # for label_item in count_dict.items():
+    #   print("#####")
+    #   print("Label:", label_item[0])
+    #   print("#####")
+    #   print()
+
+    #   for val_item in label_item[1].items():
+    #     print("#############")
+    #     print("Feature Value", val_item[0])
+    #     print("#############")
+    #     print()
+
+    #     print("#############")
+    #     print("Counter", val_item[1])
+    #     print("#############")
+    #     print()
+
+    ######################################
+    # Calculate Conditional Probabilites #
+    ######################################
+
+    validation_accuracy = 0
+    self.k = kgrid[0]
+    self.table = None
+
+    for k in kgrid:
+      prob_table = {}
+
+      for label, table in count_dict.items():
+        total_sum = util.Counter()
+        for counts in table.values():
+          total_sum += counts
+
+        total_sum.incrementAll(total_sum.keys(), len(FEATURE_VALS)*k)
+
+        feature_dict = {}
+        for feature, counts in table.items():
+          temp_counts = counts.copy()
+          temp_counts.incrementAll(temp_counts.keys(), k)
+          feature_dict[feature] = temp_counts/total_sum
+
+        prob_table[label] = feature_dict
+
+      #######################
+      # Validation Accuracy #
+      #######################
+
+      # print("K Value: ", self.k)
+      # print("Validation Accuracy: ", validation_accuracy)
+
+      current_accuracy = 0
+      old_table = self.table
+      self.table = prob_table
+
+      for datum, label in zip(validationData, validationLabels):
+        logJoint = self.calculateLogJointProbabilities(datum)
+        validation_label = logJoint.argMax()
+
+        if(validation_label == label):
+          current_accuracy += 1
+
+      # print("Current K Value: ", k)
+      # print("Current Accuracy: ", current_accuracy)
+      # print "--------------------------------------"
+      if(current_accuracy > validation_accuracy):
+        self.k = k
+        validation_accuracy = current_accuracy
+
+      else:
+        self.table = old_table
+
+    # for label_item in self.table.items():
+    #   print("#####")
+    #   print("Label:", label_item[0])
+    #   print("#####")
+    #   print()
+
+    #   for val_item in label_item[1].items():
+    #     print("#############")
+    #     print("Feature Value", val_item[0])
+    #     print("#############")
+    #     print()
+
+    #     print("#############")
+    #     print("Counter", val_item[1])
+    #     print("#############")
+    #     print()
+
   def classify(self, testData):
     """
     Classify the data based on the posterior distribution over labels.
@@ -87,10 +228,13 @@ class NaiveBayesClassifier(classificationMethod.ClassificationMethod):
     self.legalLabels.
     """
     logJoint = util.Counter()
-    
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
-    
+
+    for label in self.legalLabels:
+      logJoint[label] += math.log(self.prior[label])
+
+      for datum_key, datum_value in datum.items():
+        logJoint[label] += math.log(self.table[label][datum_value][datum_key])
+
     return logJoint
   
   def findHighOddsFeatures(self, label1, label2):
