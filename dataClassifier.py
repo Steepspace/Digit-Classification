@@ -340,7 +340,7 @@ def runClassifier(args, options):
     exec_time = np.zeros(5)
     accuracy = np.zeros(5)
     for epoch in range(5):
-      print("Iteration:", epoch)
+      print("Iteration:", epoch+1)
       #########
       # Train #
       #########
