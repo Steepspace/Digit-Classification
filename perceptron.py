@@ -44,12 +44,33 @@ class PerceptronClassifier:
     self.features = trainingData[0].keys() # could be useful later
     # DO NOT ZERO OUT YOUR WEIGHTS BEFORE STARTING TRAINING, OR
     # THE AUTOGRADER WILL LIKELY DEDUCT POINTS.
-    
+
+
+    ######################################
+    # Initialize weights vector with 1's #
+    ######################################
+
+    score_y = util.Counter()
+
+    for label in self.legalLabels:
+      for feature in self.features:
+        self.weights[label][feature] = 1
+
+
     for iteration in range(self.max_iterations):
       print "Starting iteration ", iteration, "..."
       for i in range(len(trainingData)):
-          "*** YOUR CODE HERE ***"
-          util.raiseNotDefined()
+        for label in self.legalLabels:
+          score_y[label] = trainingData[i]*self.weights[label]
+
+        guess = score_y.argMax()
+
+        if(guess == trainingLabels[i]): continue
+
+        self.weights[guess] -= trainingData[i]
+        self.weights[trainingLabels[i]] += trainingData[i]
+
+        # util.raiseNotDefined()
     
   def classify(self, data ):
     """

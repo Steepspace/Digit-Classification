@@ -15,3 +15,9 @@ python dataClassifier.py -c naiveBayes -t 1000 -s 1000 -k 0.05 > out.txt
 
 # naive bayes faces
 python dataClassifier.py -c naiveBayes -k 0.001 -d faces > out.txt
+
+# perceptron digits
+python dataClassifier.py -c perceptron -i 5 -t 1000 -s 1000 > out.txt
+
+# perceptron faces
+python dataClassifier.py -c perceptron -i 5 -d faces
