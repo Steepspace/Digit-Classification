@@ -8,3 +8,10 @@ python dataClassifier.py -c mira --autotune
 python dataClassifier.py -d digits -c naiveBayes -f -a -t 1000  
 python dataClassifier.py -d digits -c minicontest
 python runMinicontest.py
+
+-- my commands --
+# naive bayes digits
+python dataClassifier.py -c naiveBayes -t 1000 -s 1000 -k 0.05 > out.txt
+
+# naive bayes faces
+python dataClassifier.py -c naiveBayes -k 0.001 -d faces > out.txt
