@@ -67,12 +67,20 @@ def enhancedFeatureExtractorDigit(datum):
   
   ##
   """
-  features =  basicFeatureExtractorDigit(datum)
+  # features =  basicFeatureExtractorDigit(datum)
+  a = datum.getPixels()
 
-  "*** YOUR CODE HERE ***"
-  
+  features = util.Counter()
+  for x in range(DIGIT_DATUM_WIDTH):
+    for y in range(DIGIT_DATUM_HEIGHT):
+      if datum.getPixel(x, y) == 0:
+        features[(x,y)] = 0
+      elif datum.getPixel(x, y) == 1:
+        features[(x,y)] = 1
+      else:
+        features[(x,y)] = 2
+
   return features
-
 
 def contestFeatureExtractorDigit(datum):
   """
@@ -314,9 +322,55 @@ def runClassifier(args, options):
   validationData = map(featureFunction, rawValidationData)
   testData = map(featureFunction, rawTestData)
   
+  #######################################################
+  # Conduct training and testing on 10%, 20%, ..., 100% #
+  #######################################################
+
+  import random
+  import timeit
+  import numpy as np
+
+  results = {}
+
+  for percent in np.arange(0.1, 1, 0.1):
+    print '--------------------------------------'
+    print("Percent:", percent)
+    n = int(round(len(trainingData)*percent))
+    print(type(n))
+    exec_time = np.zeros(5)
+    accuracy = np.zeros(5)
+    for epoch in range(5):
+      print("Iteration:", epoch)
+      #########
+      # Train #
+      #########
+      print "Training..."
+      training_sample_index = random.sample(range(len(trainingData)), n)
+      training_sample = list(map(lambda x: trainingData[x], training_sample_index))
+      training_label = list(map(lambda x: trainingLabels[x], training_sample_index))
+      start_time = timeit.default_timer()
+      classifier.train(training_sample, training_label, validationData, validationLabels)
+      exec_time[epoch] = timeit.default_timer()-start_time
+
+      ########
+      # Test #
+      ########
+      print "Testing..."
+      guesses = classifier.classify(testData)
+      correct = [guesses[i] == testLabels[i] for i in range(len(testLabels))].count(True)
+      accuracy[epoch] = 100.0 * correct / len(testLabels)
+      print str(correct), ("correct out of " + str(len(testLabels)) + " (%.1f%%).") % accuracy[epoch]
+      analysis(classifier, guesses, testLabels, testData, rawTestData, printImage)
+
+    results[n] = (exec_time.mean(), accuracy.mean(), accuracy.std())
+    print("Results")
+    print(results[n])
+
   # Conduct training and testing
   print "Training..."
+  start_time = timeit.default_timer()
   classifier.train(trainingData, trainingLabels, validationData, validationLabels)
+  exec_time = timeit.default_timer()-start_time
   print "Validating..."
   guesses = classifier.classify(validationData)
   correct = [guesses[i] == validationLabels[i] for i in range(len(validationLabels))].count(True)
@@ -324,9 +378,20 @@ def runClassifier(args, options):
   print "Testing..."
   guesses = classifier.classify(testData)
   correct = [guesses[i] == testLabels[i] for i in range(len(testLabels))].count(True)
-  print str(correct), ("correct out of " + str(len(testLabels)) + " (%.1f%%).") % (100.0 * correct / len(testLabels))
+  accuracy = 100.0 * correct / len(testLabels)
+  print str(correct), ("correct out of " + str(len(testLabels)) + " (%.1f%%).") % accuracy
   analysis(classifier, guesses, testLabels, testData, rawTestData, printImage)
-  
+
+  results[len(trainingData)] = (exec_time, accuracy, 0)
+
+  #########################
+  # Write Results to File #
+  #########################
+
+  with open('results.txt', 'w') as fp:
+    for n, result in results.items():
+      fp.write("{}, {}, {}, {}\n".format(n, result[0], result[1], result[2]))
+
   # do odds ratio computation if specified at command line
   if((options.odds) & (options.classifier == "naiveBayes" or (options.classifier == "nb")) ):
     label1, label2 = options.label1, options.label2
