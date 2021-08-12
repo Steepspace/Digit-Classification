@@ -207,12 +207,12 @@ class Counter(dict):
     for key in self.keys():
       self[key] = self[key] / total
       
-  def divideAll(self, divisor):
+  def divideAll(self, keys, divisor):
     """
-    Divides all counts by divisor
+    Divides all counts of keys by divisor
     """
     divisor = float(divisor)
-    for key in self:
+    for key in keys:
       self[key] /= divisor
 
   def copy(self):
@@ -290,6 +290,16 @@ class Counter(dict):
         continue
       addend[key] = y[key]
     return addend
+
+  def __div__( self, y ):
+
+    quotient = Counter()
+    for key in self:
+      if key in y:
+        quotient[key] = self[key] / float(y[key])
+      else:
+        quotient[key] = self[key]
+    return quotient
     
   def __sub__( self, y ):
     """
