@@ -258,7 +258,7 @@ def readCommand( argv ):
         print "using automatic tuning for MIRA"
         classifier.automaticTuning = True
     else:
-        print "using default C=0.001 for MIRA"
+        print "using default C=0.004 for MIRA"
   elif(options.classifier == 'minicontest'):
     import minicontest
     classifier = minicontest.contestClassifier(legalLabels)
@@ -391,6 +391,20 @@ def runClassifier(args, options):
   with open('results.txt', 'w') as fp:
     for n, result in results.items():
       fp.write("{}, {}, {}, {}\n".format(n, result[0], result[1], result[2]))
+
+  # # Conduct training and testing
+  # print "Training..."
+  # classifier.train(trainingData, trainingLabels, validationData, validationLabels)
+  # print "Validating..."
+  # guesses = classifier.classify(validationData)
+  # correct = [guesses[i] == validationLabels[i] for i in range(len(validationLabels))].count(True)
+  # print str(correct), ("correct out of " + str(len(validationLabels)) + " (%.1f%%).") % (100.0 * correct / len(validationLabels))
+  # print "Testing..."
+  # guesses = classifier.classify(testData)
+  # correct = [guesses[i] == testLabels[i] for i in range(len(testLabels))].count(True)
+  # accuracy = 100.0 * correct / len(testLabels)
+  # print str(correct), ("correct out of " + str(len(testLabels)) + " (%.1f%%).") % accuracy
+  # analysis(classifier, guesses, testLabels, testData, rawTestData, printImage)
 
   # do odds ratio computation if specified at command line
   if((options.odds) & (options.classifier == "naiveBayes" or (options.classifier == "nb")) ):
