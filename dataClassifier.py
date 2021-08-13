@@ -23,7 +23,6 @@ DIGIT_DATUM_HEIGHT=28
 FACE_DATUM_WIDTH=60
 FACE_DATUM_HEIGHT=70
 
-
 def basicFeatureExtractorDigit(datum):
   """
   Returns a set of pixel features indicating whether
@@ -80,13 +79,6 @@ def enhancedFeatureExtractorDigit(datum):
       else:
         features[(x,y)] = 2
 
-  return features
-
-def contestFeatureExtractorDigit(datum):
-  """
-  Specify features to use for the minicontest
-  """
-  features =  basicFeatureExtractorDigit(datum)
   return features
 
 def enhancedFeatureExtractorFace(datum):
@@ -173,7 +165,7 @@ def readCommand( argv ):
   from optparse import OptionParser  
   parser = OptionParser(USAGE_STRING)
   
-  parser.add_option('-c', '--classifier', help=default('The type of classifier'), choices=['mostFrequent', 'nb', 'naiveBayes', 'perceptron', 'mira', 'minicontest'], default='mostFrequent')
+  parser.add_option('-c', '--classifier', help=default('The type of classifier'), choices=['mostFrequent', 'nb', 'naiveBayes', 'perceptron', 'mira'], default='mostFrequent')
   parser.add_option('-d', '--data', help=default('Dataset to use'), choices=['digits', 'faces'], default='digits')
   parser.add_option('-t', '--training', help=default('The size of the training set'), default=100, type="int")
   parser.add_option('-f', '--features', help=default('Whether to use enhanced features'), default=False, action="store_true")
@@ -195,10 +187,7 @@ def readCommand( argv ):
   print "--------------------"
   print "data:\t\t" + options.data
   print "classifier:\t\t" + options.classifier
-  if not options.classifier == 'minicontest':
-    print "using enhanced features?:\t" + str(options.features)
-  else:
-    print "using minicontest feature extractor"
+  print "using enhanced features?:\t" + str(options.features)
   print "training set size:\t" + str(options.training)
   if(options.data=="digits"):
     printImage = ImagePrinter(DIGIT_DATUM_WIDTH, DIGIT_DATUM_HEIGHT).printImage
@@ -206,8 +195,6 @@ def readCommand( argv ):
       featureFunction = enhancedFeatureExtractorDigit
     else:
       featureFunction = basicFeatureExtractorDigit
-    if (options.classifier == 'minicontest'):
-      featureFunction = contestFeatureExtractorDigit
   elif(options.data=="faces"):
     printImage = ImagePrinter(FACE_DATUM_WIDTH, FACE_DATUM_HEIGHT).printImage
     if (options.features):
@@ -259,9 +246,6 @@ def readCommand( argv ):
         classifier.automaticTuning = True
     else:
         print "using default C=0.004 for MIRA"
-  elif(options.classifier == 'minicontest'):
-    import minicontest
-    classifier = minicontest.contestClassifier(legalLabels)
   else:
     print "Unknown classifier:", options.classifier
     print USAGE_STRING
@@ -334,9 +318,8 @@ def runClassifier(args, options):
 
   for percent in np.arange(0.1, 1, 0.1):
     print '--------------------------------------'
-    print("Percent:", percent)
+    print("Percent:", percent*100)
     n = int(round(len(trainingData)*percent))
-    print(type(n))
     exec_time = np.zeros(5)
     accuracy = np.zeros(5)
     for epoch in range(5):
