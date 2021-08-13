@@ -20,4 +20,10 @@ python dataClassifier.py -c naiveBayes -k 0.001 -d faces > out.txt
 python dataClassifier.py -c perceptron -i 5 -t 1000 -s 1000 > out.txt
 
 # perceptron faces
-python dataClassifier.py -c perceptron -i 5 -d faces
+python dataClassifier.py -c perceptron -i 5 -d faces > out.txt
+
+# mira digits
+python dataClassifier.py -c mira --autotune -i 5 -t 1000 -s 1000 > out.txt
+
+# mira faces
+python dataClassifier.py -c mira -i 5 -d faces > out.txt

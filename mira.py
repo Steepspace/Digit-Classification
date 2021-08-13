@@ -21,7 +21,7 @@ class MiraClassifier:
     self.legalLabels = legalLabels
     self.type = "mira"
     self.automaticTuning = False 
-    self.C = 0.001
+    self.C = 0.004
     self.legalLabels = legalLabels
     self.max_iterations = max_iterations
     self.initializeWeightsToZero()
@@ -54,8 +54,64 @@ class MiraClassifier:
     datum is a counter from features to values for those features
     representing a vector of values.
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    validation_accuracy = 0
+    self.C = Cgrid[0]
+
+    for C in Cgrid:
+
+      # Creating a counter to keep track of scores
+      score_y = util.Counter()
+
+      # Copying weights into old_weights before clearing and starting new
+      old_weights = {}
+      for label in self.legalLabels:
+        old_weights[label] = util.Counter()
+        for feature in self.features:
+          old_weights[label][feature] = self.weights[label][feature]
+          self.weights[label][feature] = 1.
+
+      for iteration in range(self.max_iterations):
+        print "Starting iteration ", iteration, "..."
+        for i in range(len(trainingData)):
+          for label in self.legalLabels:
+            score_y[label] = trainingData[i]*self.weights[label]
+
+          guess = score_y.argMax()
+
+          if(guess == trainingLabels[i]): continue
+
+          tau = min(C, ((self.weights[guess]-self.weights[trainingLabels[i]])*trainingData[i]+1)/(2*(trainingData[i]*trainingData[i])))
+
+          scaled_training_data = trainingData[i].copy()
+          scaled_training_data.divideAll(trainingData[i].keys(), 1/tau)
+
+          self.weights[guess] -= scaled_training_data
+          self.weights[trainingLabels[i]] += scaled_training_data
+
+      #######################
+      # Validation Accuracy #
+      #######################
+
+      current_accuracy = 0
+      v_score = util.Counter()
+
+      for datum, v_label in zip(validationData, validationLabels):
+        for label in self.legalLabels:
+          v_score[label] = datum*self.weights[label]
+
+        guess = v_score.argMax()
+
+        if(v_label == guess):
+          current_accuracy += 1
+
+
+      if(current_accuracy > validation_accuracy):
+        self.C = C
+        validation_accuracy = current_accuracy
+
+      else:
+        self.weights = old_weights
 
   def classify(self, data ):
     """
