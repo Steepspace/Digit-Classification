@@ -15,3 +15,9 @@ python dataClassifier.py -c mira -i 5 -t 1000 -s 1000 > out.txt
 
 # mira faces
 python dataClassifier.py -c mira -i 5 -d faces > out.txt
+
+# single digit
+python classify.py -c naiveBayes -k 0.001 -s 1
+
+# single face
+python classify.py -c naiveBayes -k 0.001 -d faces -s 1
