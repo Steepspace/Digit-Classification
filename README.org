@@ -1,6 +1,6 @@
 #+TITLE: Digit Classification
 * Report
-Checkout the report here:[[ file:report.pdf]]
+Checkout the report [[https://github.com/Steepspace/Digit-Classification/blob/master/report.pdf][here]].
 
 * Getting Started
 To try out the classification pipeline, run dataClassifier.py from the command line. This will classify the digit data using the default classifier (mostFrequent) which blindly classifies every example with the most frequent label.
