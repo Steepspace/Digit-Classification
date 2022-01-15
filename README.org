@@ -1,23 +1,26 @@
-#+TITLE: Classification
+#+TITLE: Digit Classification
+* Report
+Checkout the report here:[[ file:report.pdf]]
 
 * Getting Started
 To try out the classification pipeline, run dataClassifier.py from the command line. This will classify the digit data using the default classifier (mostFrequent) which blindly classifies every example with the most frequent label.
-
+#+begin_src bash
 python dataClassifier.py
+#+end_src
 
 As usual, you can learn more about the possible command line options by running:
-
+#+begin_src bash
 python dataClassifier.py -h
+#+end_src
 
-We have defined some simple features for you. Later you will design some better features. Our simple feature set includes one feature for each pixel location, which can take values 0 or 1 (off or on). The features are encoded as a Counter where keys are feature locations (represented as (column,row)) and values are 0 or 1. The face recognition data set has value 1 only for those pixels identified by a Canny edge detector.
-
-Implementation Note: You'll find it easiest to hard-code the binary feature assumption. If you do, make sure you don't include any non-binary features. Or, you can write your code more generally, to handle arbitrary feature values, though this will probably involve a preliminary pass through the training set to find all possible feature values (and you'll need an "unknown" option in case you encounter a value in the test data you never saw during training).
+Our simple feature set includes one feature for each pixel location, which can take values 0 or 1 (off or on). The features are encoded as a Counter where keys are feature locations (represented as (column,row)) and values are 0 or 1. The face recognition data set has value 1 only for those pixels identified by a Canny edge detector.
 
 * Naive Bayes
 ** Smoothing
-*Question 1 (6 points)* Implement trainAndTune and calculateLogJointProbabilities in naiveBayes.py. In trainAndTune, estimate conditional probabilities from the training data for each possible value of k given in the list kgrid. Evaluate accuracy on the held-out validation set for each k and choose the value with the highest validation accuracy. In case of ties, prefer the lowest value of k. Test your classifier with:
-
+Implementation of trainAndTune and calculateLogJointProbabilities in naiveBayes.py. In trainAndTune, estimate conditional probabilities from the training data for each possible value of k given in the list kgrid. Evaluate accuracy on the held-out validation set for each k and choose the value with the highest validation accuracy. In case of ties, prefer the lowest value of k. The classifier is tested with:
+#+begin_src bash
 python dataClassifier.py -c naiveBayes --autotune
+#+end_src
 
 Hints and observations:
 
@@ -31,15 +34,17 @@ Hints and observations:
 - To run on the face recognition dataset, use -d faces (optional).
 
 ** Odd Ratios
-*Question 2 (2 points)* Fill in the function findHighOddsFeatures(self, label1, label2). It should return a list of the 100 features with highest odds ratios for label1 over label2. The option -o activates an odds ratio analysis. Use the options -1 label1 -2 label2 to specify which labels to compare. Running the following command will show you the 100 pixels that best distinguish between a 3 and a 6.
-
+The function findHighOddsFeatures(self, label1, label2) returns a list of the 100 features with highest odds ratios for label1 over label2. The option -o activates an odds ratio analysis. Use the options -1 label1 -2 label2 to specify which labels to compare. Running the following command will show you the 100 pixels that best distinguish between a 3 and a 6.
+#+begin_src bash
 python dataClassifier.py -a -d digits -c naiveBayes -o -1 3 -2 6
+#+end_src
 
 * Perceptron
 ** Learning Weights
-*Question 3 (4 points)* Fill in the train method in perceptron.py. Run your code with:
-
+Run the code with:
+#+begin_src bash
 python dataClassifier.py -c perceptron
+#+end_src
 
 Hints and observations:
 
@@ -47,9 +52,11 @@ Hints and observations:
 - One of the problems with the perceptron is that its performance is sensitive to several practical details, such as how many iterations you train it for, and the order you use for the training examples (in practice, using a randomized order works better than a fixed order). The current code uses a default value of 3 training iterations. You can change the number of iterations for the perceptron with the -i iterations option. Try different numbers of iterations and see how it influences the performance. In practice, you would use the performance on the validation set to figure out when to stop training, but you don't need to implement this stopping criterion for this assignment.
 
 ** Visualizing Weights
-*Question 4 (1 point)* Fill in findHighWeightFeatures(self, label) in perceptron.py. It should return a list of the 100 features with highest weight for that label. You can display the 100 pixels with the largest weights using the command:
+The function findHighWeightFeatures(self, label) in perceptron.py returns a list of the 100 features with highest weight for that label. You can display the 100 pixels with the largest weights using the command:
 
+#+begin_src bash
 python dataClassifier.py -c perceptron -w
+#+end_src
 
 * Links
 https://inst.eecs.berkeley.edu//~cs188/sp11/projects/classification/classification.html
